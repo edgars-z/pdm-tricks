@@ -7,50 +7,60 @@
 </head>
 <body>
     <p id="status">Processing...</p>
+
     <script>
-        function getQueryParam(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            function getQueryParam(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
 
-        function copyToClipboard(text) {
-            if (!text) return;
+            function copyToClipboard(text) {
+                if (!text) return;
 
-            navigator.clipboard.writeText(text).then(() => {
-                document.getElementById("status").innerText = "Copied: " + text;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        updateStatus("✅ Copied: " + text);
+                        attemptCloseTab();
+                    }).catch(err => {
+                        console.error("Clipboard API failed:", err);
+                        fallbackCopy(text);
+                    });
+                } else {
+                    fallbackCopy(text);
+                }
+            }
+
+            function fallbackCopy(text) {
+                const input = document.createElement("textarea");
+                input.value = text;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand("copy");
+                document.body.removeChild(input);
+                updateStatus("✅ Copied (fallback): " + text);
                 attemptCloseTab();
-            }).catch(err => {
-                console.error("Clipboard API failed:", err);
-                fallbackCopy(text);
-            });
-        }
+            }
 
-        function fallbackCopy(text) {
-            const input = document.createElement("input");
-            document.body.appendChild(input);
-            input.value = text;
-            input.select();
-            document.execCommand("copy");
-            document.body.removeChild(input);
-            document.getElementById("status").innerText = "Copied (fallback): " + text;
-            attemptCloseTab();
-        }
+            function attemptCloseTab() {
+                setTimeout(() => {
+                    window.close();
+                    updateStatus("❌ Tab cannot be closed automatically. Please close it manually.");
+                }, 500);
+            }
 
-        function attemptCloseTab() {
-            setTimeout(() => {
-                window.close(); // Try closing the tab
-                document.getElementById("status").innerHTML += "<br>Close this tab manually.";
-            }, 500);
-        }
+            function updateStatus(message) {
+                document.getElementById("status").innerHTML = message;
+            }
 
-        window.onload = function () {
+            // Get DISP_ART_NO and copy it
             const dispArtNo = getQueryParam("DISP_ART_NO");
             if (dispArtNo) {
                 copyToClipboard(dispArtNo);
             } else {
-                document.getElementById("status").innerText = "No DISP_ART_NO provided.";
+                updateStatus("❌ No DISP_ART_NO provided.");
             }
-        };
+        });
     </script>
 </body>
 </html>
