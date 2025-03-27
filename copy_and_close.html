@@ -5,38 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Copy and Close</title>
     <script>
-        function getHashParam(name) {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            return hashParams.get(name);
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
         }
 
         function copyToClipboard(text) {
-            if (!text) return;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    window.close();
-                }).catch(err => {
-                    console.error("Clipboard API failed:", err);
-                    fallbackCopy(text);
-                });
-            } else {
-                fallbackCopy(text);
-            }
-        }
-
-        function fallbackCopy(text) {
-            const input = document.createElement("input");
-            input.value = text;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand("copy");
-            document.body.removeChild(input);
-            window.close();
+            navigator.clipboard.writeText(text).then(() => {
+                window.close(); // Try to close the tab
+            }).catch(err => {
+                console.error("Clipboard copy failed:", err);
+            });
         }
 
         window.onload = function () {
-            const dispArtNo = getHashParam("DISP_ART_NO");
+            const dispArtNo = getQueryParam("DISP_ART_NO");
             if (dispArtNo) {
                 copyToClipboard(dispArtNo);
             }
