@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Copy and Close</title>
+</head>
+<body>
+    <p id="status">Processing...</p>
     <script>
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -11,22 +14,43 @@
         }
 
         function copyToClipboard(text) {
+            if (!text) return;
+
             navigator.clipboard.writeText(text).then(() => {
-                window.close(); // Try to close the tab
+                document.getElementById("status").innerText = "Copied: " + text;
+                attemptCloseTab();
             }).catch(err => {
-                console.error("Clipboard copy failed:", err);
+                console.error("Clipboard API failed:", err);
+                fallbackCopy(text);
             });
+        }
+
+        function fallbackCopy(text) {
+            const input = document.createElement("input");
+            document.body.appendChild(input);
+            input.value = text;
+            input.select();
+            document.execCommand("copy");
+            document.body.removeChild(input);
+            document.getElementById("status").innerText = "Copied (fallback): " + text;
+            attemptCloseTab();
+        }
+
+        function attemptCloseTab() {
+            setTimeout(() => {
+                window.close(); // Try closing the tab
+                document.getElementById("status").innerHTML += "<br>Close this tab manually.";
+            }, 500);
         }
 
         window.onload = function () {
             const dispArtNo = getQueryParam("DISP_ART_NO");
             if (dispArtNo) {
                 copyToClipboard(dispArtNo);
+            } else {
+                document.getElementById("status").innerText = "No DISP_ART_NO provided.";
             }
         };
     </script>
-</head>
-<body>
-    <p>Processing...</p>
 </body>
 </html>
