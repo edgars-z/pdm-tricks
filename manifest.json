@@ -1,17 +1,20 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Plockmatic PDM Search",
   "version": "0.1",
-  "description": "Automatically copies DISP_ART_NO from URL and closes the tab.",
+  "description": "A helper extension to enable search in PDM and M3 directly from Creo View",
   "permissions": [
     "tabs",
     "scripting",
     "clipboardWrite",
-    "activeTab",
-    "http://pdmapp.plockmatic.local/*"
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://pdmapp.plockmatic.local/*",
+    "https://edgars-z.github.io/pdm-tricks/*"
   ],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker":  "background.js",
+    "scripts": ["background.js"]
   }
 }

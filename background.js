@@ -1,13 +1,13 @@
-browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === "complete" && tab.url.includes("DISP_ART_NO=")) {
         const urlParams = new URL(tab.url).searchParams;
         const dispArtNo = urlParams.get("DISP_ART_NO");
         const searchType = urlParams.get("SEARCH_TYPE");
 
         if (dispArtNo) {
-            copyToClipboard(dispArtNo);
+            copyToClipboard(tabId, dispArtNo);
 			setTimeout(() => {
-                browser.tabs.remove(tabId); // Close the tab
+                chrome.tabs.remove(tabId); // Close the tab
             }, 500);
             if (searchType == "M3"){
                 openSearchPage(dispArtNo, 1);
@@ -23,11 +23,17 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 
 
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        console.log("✅ Copied:", text);
-    }).catch(err => {
-        console.error("Clipboard write failed:", err);
+function copyToClipboard(tabId, text) {
+    chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        func: (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log("✅ Copied:", text);
+            }).catch(err => {
+                console.error("Clipboard write failed:", err);
+            });
+        },
+        args: [text]
     });
 }
 
@@ -42,11 +48,11 @@ function openSearchPage(searchValue, searchTarget) {
         searchURL ="http://pdmapp.plockmatic.local/Windchill/app/"
     }
 
-	browser.tabs.create({ url: searchURL }).then(tab => {
-        browser.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+	chrome.tabs.create({ url: searchURL }).then(tab => {
+        chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
             console.log("Tab opened");
 			if (tabId === tab.id && changeInfo.status === "complete") {
-                browser.tabs.onUpdated.removeListener(listener);
+                chrome.tabs.onUpdated.removeListener(listener);
                 if (searchTarget == 0){
                     injectSearchScript(tabId, searchValue);
                 }
@@ -56,11 +62,11 @@ function openSearchPage(searchValue, searchTarget) {
 }
 
 function injectSearchScript(tabId, searchValue) {
-    console.log("🔧 Injecting script into Firefox tab...");
-    browser.scripting.executeScript({
+    console.log("🔧 Injecting script into tab...");
+    chrome.scripting.executeScript({
         target: { tabId: tabId },
         func: (value) => {
-            console.log("🔎 Injected script running in Firefox...");
+            console.log("🔎 Injected script running...");
 			function waitForElement(selector, callback) {
 				console.log("🔍 Waiting for element:", selector);
 				let elementFound = false;  // Track if the element is found
@@ -102,6 +108,6 @@ function injectSearchScript(tabId, searchValue) {
         },
         args: [searchValue]
     }).catch(err => {
-        console.error("Script injection error in Firefox:", err);
+        console.error("Script injection error:", err);
     });
 }
