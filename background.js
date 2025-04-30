@@ -2,16 +2,26 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === "complete" && tab.url.includes("DISP_ART_NO=")) {
         const urlParams = new URL(tab.url).searchParams;
         const dispArtNo = urlParams.get("DISP_ART_NO");
+        const searchType = urlParams.get("SEARCH_TYPE");
 
         if (dispArtNo) {
             copyToClipboard(dispArtNo);
 			setTimeout(() => {
                 browser.tabs.remove(tabId); // Close the tab
             }, 500);
-            openSearchPage(dispArtNo);
+            if (searchType == "M3"){
+                openSearchPage(dispArtNo, 1);
+            }
+            else {
+                openSearchPage(dispArtNo, 0);
+            }
+            
         }
     }
 });
+
+
+
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
@@ -21,14 +31,25 @@ function copyToClipboard(text) {
     });
 }
 
-function openSearchPage(searchValue) {
+function openSearchPage(searchValue, searchTarget) {
     console.log("Opening tab");
-	browser.tabs.create({ url: "http://pdmapp.plockmatic.local/Windchill/app/" }).then(tab => {
+    if (searchTarget == 1){
+        searchURL = "https://mingle-portal.eu1.inforcloudsuite.com/v2/AXRDNDZQ48CVDSHX_PRD/58f1c364-f675-4e1f-aae9-54b9f27933ac?favoriteContext=bookmark?MMS001%26fieldNames=W1OBKV%252C" +
+            searchValue + "%26tableName=MITMAS%26keys=MMCONO%252C1%252CMMITNO%252C" +
+            searchValue + "%26name=MMS001%252FB%26description=MMS001%2520Item.%2520Open%26includeStartPanel=True%26source=MForms%26requirePanel=True%26startPanel=B%26sortingOrder=1%26view=STD01-02&LogicalId=lid://infor.m3.m3";
+    }
+    else {
+        searchURL ="http://pdmapp.plockmatic.local/Windchill/app/"
+    }
+
+	browser.tabs.create({ url: searchURL }).then(tab => {
         browser.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
             console.log("Tab opened");
 			if (tabId === tab.id && changeInfo.status === "complete") {
                 browser.tabs.onUpdated.removeListener(listener);
-                injectSearchScript(tabId, searchValue);
+                if (searchTarget == 0){
+                    injectSearchScript(tabId, searchValue);
+                }
             }
         });
     });

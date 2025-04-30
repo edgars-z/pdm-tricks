@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Auto Copy & Close",
-  "version": "1.0",
+  "name": "Plockmatic PDM Search",
+  "version": "0.1",
   "description": "Automatically copies DISP_ART_NO from URL and closes the tab.",
   "permissions": [
     "tabs",
