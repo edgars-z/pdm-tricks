@@ -1,0 +1,23 @@
+<menu
+  ui="rmb"
+  view="all"
+  pane="all"
+  select="any"
+  visible="getSelectedCount()==1 &amp;&amp; getPropertyExists(&apos;DISP_ART_NO&apos;)">
+  <label>Search DISP_ART_NO in M3</label>
+  <action
+    target="browser">https://edgavvvrs-z.github.io/pdm-tricks/copy_and_close.html?SEARCH_TYPE=M3&amp;DISP_ART_NO=&lt;!DISP_ART_NO!&gt;</action>
+</menu>
+
+
+
+<menu
+  ui="rmb"
+  view="all"
+  pane="all"
+  select="any"
+  visible="getSelectedCount()==1 &amp;&amp; getPropertyExists(&apos;DISP_ART_NO&apos;)">
+  <label>Search DISP_ART_NO in PDM</label>
+  <action
+    target="browser">https://edgavvvrs-z.github.io/pdm-tricks/copy_and_close.html?DISP_ART_NO=&lt;!DISP_ART_NO!&gt;</action>
+</menu>
